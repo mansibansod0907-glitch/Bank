@@ -8,7 +8,7 @@ import com.bankapp.SavingsAccount;
 import com.services.BankService;
 
 public class BankApp {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         Scanner sc = new Scanner(System.in);
         BankService bank = new BankService();
 
@@ -35,16 +35,26 @@ public class BankApp {
 
                 case 3:
                     System.out.print("Enter Acc No & Amount: ");
-                    Account acc1 = bank.findAccount(sc.nextInt());
-                    if (acc1 != null) acc1.deposit(sc.nextDouble());
-                    else System.out.println("Account not found!");
+                    int dAccNo = sc.nextInt();
+                    double dAmt = sc.nextDouble();
+
+                    Account acc1 = bank.findAccount(dAccNo);
+                    if (acc1 != null) {
+                        acc1.deposit(dAmt);
+                        bank.updateBalance(acc1);   // SAVE TO DB
+                    } else System.out.println("Account not found!");
                     break;
 
                 case 4:
                     System.out.print("Enter Acc No & Amount: ");
-                    Account acc2 = bank.findAccount(sc.nextInt());
-                    if (acc2 != null) acc2.withdraw(sc.nextDouble()); // Polymorphism happens here
-                    else System.out.println("Account not found!");
+                    int wAccNo = sc.nextInt();
+                    double wAmt = sc.nextDouble();
+
+                    Account acc2 = bank.findAccount(wAccNo);
+                    if (acc2 != null) {
+                        acc2.withdraw(wAmt);        // polymorphism
+                        bank.updateBalance(acc2);   // SAVE TO DB
+                    } else System.out.println("Account not found!");
                     break;
 
                 case 5:
