@@ -2,30 +2,24 @@ package com.db;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
 
 public class ConnectionDb {
 
-	public static void main(String[] args) throws Exception {
+    private static final String URL = "jdbc:mysql://localhost:3306/bankdb";
+    private static final String USER = "root";
+    private static final String PASS = "Mansi@123";
 
-		String url = "jdbc:mysql://localhost:3306/bankdb";
-		
-		String user ="root";
-		String pass = "Mansi@123";
+    public static Connection getConnection() {
+        Connection con = null;
 
-		Class.forName("com.mysql.cj.jdbc.Driver");
-		System.out.println("Driver Loaded Succesfully");
-		
-		Connection con = DriverManager.getConnection(url, user, pass);
-		System.out.println("connection established Sucessfully");
-		
-		
-	}
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            con = DriverManager.getConnection(URL, USER, PASS);
+        } catch (Exception e) {
+            System.out.println("Database Connection Failed!");
+            e.printStackTrace();
+        }
 
-	public static Connection getConnection() {
-		
-		return null;
-	}
-
+        return con;
+    }
 }

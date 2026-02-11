@@ -10,80 +10,104 @@ import com.bankapp.*;
 
 public class BankService {
 	
-    public void addAccount(Account acc) throws Exception {
-    	
-    	Connection con = ConnectionDb.getConnection();
-    	
-    	String sql = "INSERT INTO accounts VALUES (?,?,?,?)";
-    	 PreparedStatement ps = con.prepareStatement(sql);
+	public void addAccount(Account acc) {
+	    try {
+	        Connection con = ConnectionDb.getConnection();
 
-         ps.setInt(1, acc.getAccountNumber());
-         ps.setString(2, acc.getHolderName());
-         ps.setDouble(3, acc.getBalance());
-        
+	        String sql = "INSERT INTO accounts VALUES (?,?,?,?)";
+	        PreparedStatement ps = con.prepareStatement(sql);
 
-         if (acc instanceof SavingsAccount) 
-             ps.setString(4, "SAVINGS");
-         
-         else 
-             ps.setString(4, "CURRENT");
+	        ps.setInt(1, acc.getAccountNumber());
+	        ps.setString(2, acc.getHolderName());
+	        ps.setDouble(3, acc.getBalance());
 
-         ps.executeUpdate();
-         System.out.println("Account saved to DB!");
-         con.close();
-     }
+	        if (acc instanceof SavingsAccount)
+	            ps.setString(4, "SAVINGS");
+	        else
+	            ps.setString(4, "CURRENT");
+
+	        ps.executeUpdate();
+	        System.out.println("Account saved to DB!");
+
+	        con.close();
+	    } catch (Exception e) {
+	        System.out.println("Error while adding account");
+	        e.printStackTrace();
+	    }
+	}
+	
+	public Account findAccount(int accNo) {
+	    Account acc = null;
+
+	    try {
+	        Connection con = ConnectionDb.getConnection();
+
+	        String sql = "SELECT * FROM accounts WHERE account_number=?";
+	        PreparedStatement ps = con.prepareStatement(sql);
+	        ps.setInt(1, accNo);
+
+	        ResultSet rs = ps.executeQuery();
+
+	        if (rs.next()) {
+	            String name = rs.getString("holder_name");
+	            double bal = rs.getDouble("balance");
+	            String type = rs.getString("account_type");
+
+	            if (type.equals("SAVINGS"))
+	                acc = new SavingsAccount(accNo, name, bal);
+	            else
+	                acc = new CurrentAccount(accNo, name, bal);
+	        }
+
+	        con.close();
+
+	    } catch (Exception e) {
+	        System.out.println("Error finding account");
+	        e.printStackTrace();
+	    }
+
+	    return acc;
+	}
     
-    public Account findAccount(int accNo) throws Exception {
-    	Connection con = ConnectionDb.getConnection();
-        
-    	String sql = "SELECT * FROM accounts WHERE account_number=?";
-        PreparedStatement ps = con.prepareStatement(sql);
-        ps.setInt(1, accNo);
+	public void updateBalance(Account acc) {
+	    try {
+	        Connection con = ConnectionDb.getConnection();
 
-        ResultSet rs = ps.executeQuery();
-        if (rs.next()) {
-            String name = rs.getString("holder_name");
-            double bal = rs.getDouble("balance");
-            String type = rs.getString("account_type");
+	        String sql = "UPDATE accounts SET balance=? WHERE account_number=?";
+	        PreparedStatement ps = con.prepareStatement(sql);
+	        ps.setDouble(1, acc.getBalance());
+	        ps.setInt(2, acc.getAccountNumber());
 
-            con.close();
+	        ps.executeUpdate();
+	        con.close();
 
-            if (type.equals("SAVINGS"))
-                return new SavingsAccount(accNo, name, bal);
-            else
-                return new CurrentAccount(accNo, name, bal);
-        }
+	    } catch (Exception e) {
+	        System.out.println("Error updating balance");
+	        e.printStackTrace();
+	    }
+	}
 
-        con.close();
-        return null;
-    }
-    
-    public void updateBalance(Account acc) throws Exception {
-        Connection con = ConnectionDb.getConnection();
+	public void showAllAccounts() {
+	    try {
+	        Connection con = ConnectionDb.getConnection();
 
-        String sql = "UPDATE accounts SET balance=? WHERE account_number=?";
-        PreparedStatement ps = con.prepareStatement(sql);
-        ps.setDouble(1, acc.getBalance());
-        ps.setInt(2, acc.getAccountNumber());
+	        String sql = "SELECT * FROM accounts";
+	        PreparedStatement ps = con.prepareStatement(sql);
+	        ResultSet rs = ps.executeQuery();
 
-        ps.executeUpdate();
-        con.close();
-    }
+	        while (rs.next()) {
+	            System.out.println("---------------------");
+	            System.out.println("Acc No: " + rs.getInt("account_number"));
+	            System.out.println("Name: " + rs.getString("holder_name"));
+	            System.out.println("Balance: " + rs.getDouble("balance"));
+	            System.out.println("Type: " + rs.getString("account_type"));
+	        }
 
-    public void showAllAccounts() throws Exception {
+	        con.close();
 
-        Connection con = ConnectionDb.getConnection();
-
-        String sql = "SELECT * FROM accounts";
-        PreparedStatement ps = con.prepareStatement(sql);
-        ResultSet rs = ps.executeQuery();
-
-        while (rs.next()) {
-            System.out.println("---------------------");
-            System.out.println("Acc No: " + rs.getInt(1));
-            System.out.println("Name: " + rs.getString(2));
-            System.out.println("Balance: " + rs.getDouble(3));
-            System.out.println("Type: " + rs.getString(4));
-        }
-    }
+	    } catch (Exception e) {
+	        System.out.println("Error displaying accounts");
+	        e.printStackTrace();
+	    }
+	}
 }
